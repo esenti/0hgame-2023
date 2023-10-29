@@ -32,11 +32,11 @@
   let colors;
 
   window.addEventListener("keydown", function(e) {
-    keysDown[e.keyCode] = true;
-    return keysPressed[e.keyCode] = true;
+    return keysDown[e.keyCode] = true;
   }, false);
 
   window.addEventListener("keyup", function(e) {
+    keysPressed[e.keyCode] = true;
     return delete keysDown[e.keyCode];
   }, false);
 
@@ -58,6 +58,7 @@
     elapsed = 0;
 
     score = 0;
+    highScore = 0;
 
     controls = {
       a: 65,
@@ -66,6 +67,8 @@
     colors = {
       bg: "#000000",
       score: "#ffffff",
+      highScore: "#aaaaaa",
+      particles: "#aaaaaa",
     }
 
     document.getElementsByTagName("html")[0].style.background = colors.bg;
@@ -117,17 +120,29 @@
       score += 1;
     }
 
-    score -= delta * 4;
+    score -= delta * (4 + 0.1 * score);
     score = Math.max(score, 0);
 
-    if (score > 5 && Math.random() < 0.05)
+    highScore = Math.max(score, highScore);
+
+    if (score > 10 && Math.random() < 0.05)
+    {
+      explode(Math.random() * 800, Math.random() * 600, score * 0.01);
+    }
+
+    if (score > 20 && Math.random() < 0.1)
     {
       explode(Math.random() * 800, Math.random() * 600, score * 0.05);
     }
 
-    if (score > 10 && Math.random() < 0.1)
+    if (score > 30 && Math.random() < 0.15)
     {
-      explode(Math.random() * 800, Math.random() * 600, score * 0.1);
+      explode(Math.random() * 800, Math.random() * 600, score * 0.2);
+    }
+
+    if (score > 40 && Math.random() < 0.2)
+    {
+      explode(Math.random() * 800, Math.random() * 600, score * 0.5);
     }
 
     for(var i = particles.length - 1; i >= 0; i--) {
@@ -148,26 +163,33 @@
     ctx.fillStyle = colors.bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#fafafa";
-    const fontSize = Math.floor(score);
-
-    ctx.textAlign = "center";
-    ctx.font = `${fontSize}px Visitor`;
-    ctx.fillText("A", 400, 300);
-
     ctx.fillStyle = colors.particles;
-
     particles.forEach(function(particle) {
       ctx.fillStyle = colors.particles;
       ctx.font = `${particle.w * particle.h}px Visitor`;
       ctx.fillText("A", particle.x, particle.y);
     })
 
-    if (score != 0) {
+    ctx.fillStyle = "#fafafa";
+    const fontSize = Math.floor(score * 12);
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `${fontSize}px Visitor`;
+    ctx.fillText("A", 400, 300);
+
+    if (score >= 0) {
       ctx.fillStyle = colors.score;
       ctx.textAlign = "center";
       ctx.font = "40px Visitor";
       ctx.fillText(Math.round(score * 1000), 400, 50);
+    }
+
+    if (highScore >= 0) {
+      ctx.fillStyle = colors.highScore;
+      ctx.textAlign = "center";
+      ctx.font = "20px Visitor";
+      ctx.fillText(Math.round(highScore * 1000), 400, 70);
     }
 
      if(ogre) {
